@@ -34,7 +34,7 @@ SOCIAL_INSURANCE_MONEY_RATE = {
 
 def calc_income_tax_and_remain(income):
 # 计算扣除社保缴费和起征点之后的应纳税额
-    social_insurance_money = income * sum(SOCIAL_INSURANCE_MONEY_RATE.value())
+    social_insurance_money = income * sum(SOCIAL_INSURANCE_MONEY_RATE.values())
     real_income = income - social_insurance_money
     taxable_part = real_income - INCOME_TAX_START_POINT
 
@@ -56,7 +56,7 @@ def main():
             continue
 
         _, remain = calc_income_tax_and_remain(income)
-        print('{}:{}'.formant(employee_id, remain))
+        print('{}:{}'.format(employee_id, remain))
 
 if __name__ == '__main__':
     main()
