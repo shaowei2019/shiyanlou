@@ -42,7 +42,7 @@ class Config(object):
         config = {}
 
         with open(args.config_path) as f:
-            for line in f.readline():
+            for line in f.readlines():
                 key, value = line.strip().split('=')
                 config[key.strip()] = float(value.strip())
         return config
@@ -69,11 +69,12 @@ class UserData(object):
     def __init__(self):
         self.userdata = self._read_user_data()
 
-    def _read_users_data(self):
+    def _read_user_data(self):
         userdata = []
         with open(args.userdata_path) as f:
-            for line in f.readline():
-                employee_id, income = line.strip().split(':')
+            for line in f.readlines():
+                employee_id, income_string = line.strip().split(',')
+                income = int(income_string)
                 userdata.append((employee_id,income))
         return userdata
     def get_userdata(self):
@@ -82,15 +83,15 @@ class IncomeTaxCalculator(object):
     def __init__(self,userdata):
         self.userdata = userdata
 
-    @classmethed
+    @classmethod
     def calc_social_insurance_money(cls,income):
         if income < config.insurance_basic_low:
-            return config.insurance_basic_low * social_insurance_rate
+            return config.insurance_basic_low * config.social_insurance_rate
         elif income > config.insurance_basic_high:
-            return  config.insurance_basic_high * social_insurance_rate
+            return  config.insurance_basic_high * config.social_insurance_rate
         else:
-            return income * social_insurance_rate
-    @classmethed
+            return income * config.social_insurance_rate
+    @classmethod
     def calc_income_tax_and_remain(cls,income):
         social_insurance_money = cls.calc_social_insurance_money(income)
         real_income = income - social_insurance_money
@@ -99,14 +100,14 @@ class IncomeTaxCalculator(object):
             if tax_part > item.start_point:
                 tax = tax_part * item.tax_rate - item.quick_num
                 return '{:.2f}'.format(tax),'{:.2f}'.format(real_income-tax)
-        return '0.00','{:.2f}'.formant(real_income)
+        return '0.00','{:.2f}'.format(real_income)
 
         
     def calc_for_all_userdata(self):
         result = []
         for employee_id,income in self.userdata.get_userdata():
             social_insurance_money = '{:.2f}'.format(self.calc_social_insurance_money(income))
-            tax,remain = self.calc_income_tax_and_ramain(income)
+            tax,remain = self.calc_income_tax_and_remain(income)
             result.append([employee_id,income,social_insurance_money,tax,remain])
         return result
     def export(self,default='csv'):
@@ -116,7 +117,7 @@ class IncomeTaxCalculator(object):
             writer.writerows(result)
 
 if __name__ == '__main__':
-    calcutor = IncomeTaxCalculator(Userdata())
+    calcutor = IncomeTaxCalculator(UserData())
     calcutor.export()
             
 
