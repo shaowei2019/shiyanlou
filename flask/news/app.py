@@ -1,6 +1,6 @@
 import os
 import json
-from flask import Flask,render_template
+from flask import Flask,render_template,abort
 
 app = Flask(__name__)
 app.config['TEMPLATES_AUTO_RELOAD'] = True
@@ -26,7 +26,14 @@ files = Files()
 def index():
     return render_template('index.html',title_list=files.get_title_list())
 @app.route('/files/<filename>')
-def files(filename):
-    return render_template('file.html',file_item=files.get_by_filename(filename))
+def file(filename):
+    file_item = files.get_by_filename(filename)
+    if not file_item:
+        abort(404)
+    else:
+        return render_template('file.html',file_item=files.get_by_filename(filename))
+@app.errorhandler(404)
+def not_found(error):
+    return render_template('404.html'),404
 if __name__ == '__main__':
     app.run()
